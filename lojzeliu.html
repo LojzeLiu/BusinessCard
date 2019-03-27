@@ -1,6 +1,42 @@
 <html>
     <head>
         <title>刘洋</title>
+        <script>
+         //从属性里复制
+         var btn = document.getElementById('btn');
+         var clipboard = new Clipboard(btn);//实例化
+         clipboard.on('success', function(e) {//复制成功执行的回调，可选
+             console.log(e);
+         });
+         clipboard.on('error', function(e) {//复制失败执行的回调，可选
+             console.log(e);
+         });
+
+         //从另外一个元素复制内容
+         var btn2 = document.getElementById('btn2');
+         var clipboard2 = new Clipboard(btn2);//实例化
+         clipboard2.on('success', function(e) {//复制成功执行的回调，可选
+             console.log(e);
+         });
+         clipboard2.on('error', function(e) {//复制失败执行的回调，可选
+             console.log(e);
+         });
+
+
+         //JS里指定复制的内容
+         var btn3 = document.getElementById('btn3');
+         var clipboard3 = new Clipboard(btn3, {
+             text: function() {
+                 return '333-JS里指定复制的内容';
+             }
+         });
+         clipboard3.on('success', function(e) {//复制成功执行的回调，可选
+             console.log(e);
+         });
+         clipboard3.on('error', function(e) {//复制失败执行的回调，可选
+             console.log(e);
+         });
+        </script>
     </head>
     <body>
         <h1>刘洋</h1>
@@ -9,6 +45,8 @@
         <b>TEL: </b><a href="tel:13811107587">138-1110-7587</a>
         <b>Email: </b><a href="mailto:lojze@foxmail.com">lojze@foxmail.com</a>
         <b>Gamil: </b><a href="mailto:lojzeliu@gmail.com">lojzeliu@gmail.com</a>
-        <b>WeChat: </b><b>813-836-993</b>
+        <div id="btn" class="js-copy" data-clipboard-text="813836993">
+            <b>WeChat: </b> <span>813836993</span>
+        </div>
     </body>
 </html>

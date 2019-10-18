@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>刘洋</title>
-    </head>
-    <body>
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <title>刘洋</title>
+</head>
+
+<body>
+    <div id="app">
+
         <h1>刘洋</h1>
         <h2>服务器研发工程师</h2>
         <h3>天鸽互动控股有限公司(香港主板上市公司代码: 1980)</h3>
@@ -12,5 +17,50 @@
         <b>Email: </b><a href="mailto:lojze@foxmail.com">lojze@foxmail.com</a>
         <b>Gamil: </b><a href="mailto:lojzeliu@gmail.com">lojzeliu@gmail.com</a>
         <b>WeChat: </b><a>813836993</a>
-    </body>
+        <p> uname:
+            {{ uname }}
+        </p>
+        <p> paswd:
+            {{ paswd }}
+        </p>
+
+        <p>
+            {{message}}
+        </p>
+    </div>
+    <!-- <script src="https://unpkg.com/element-ui/lib/index.js"></script> -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="Bmob-2.2.1.min.js"></script>
+    <script type="module">
+        import Vue from 'https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.esm.browser.js'
+        // 初始化
+        Bmob.initialize("1348df36d3789809", "78520A");
+        var app = new Vue({
+            el: '#app',
+            data: {
+                message: 'Hello Vue!',
+                uname: '',
+                paswd: ''
+            },
+            created: function () {
+                this.uname = this.getUrlKey("name");
+                this.paswd = this.getUrlKey("paswd");
+                const query = Bmob.Query('t_user_card_info');
+                query.get('X5jI333N').then(res => {
+                    console.log(res)
+                    this.message = res
+                }).catch(err => {
+                    console.log(err)
+                    this.message = err
+                })
+            },
+            methods: {
+                getUrlKey: function (name) {
+                    return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || [, ""])[1].replace(/\+/g, '%20')) || null
+                }
+            }
+        })
+    </script>
+</body>
+
 </html>

@@ -40,10 +40,10 @@
 
 <body>
     <div id="app">
-        <van-overlay v-if="loading">
+        <van-overlay :show="loading">
             <van-loading class="load" size="200px" vertical type="spinner" color="#1989fa">加载中...</van-loading>
         </van-overlay>
-        <van-panel v-else class="card-info">
+        <van-panel :show="!loading" class="card-info">
             <div slot="header" class="head">
                 <h1>{{card_info.f_name}}{{card_info.l_name}}</h1>
             </div>
@@ -113,6 +113,9 @@
                 query.containedIn("nk_name", [this.uname]);
                 query.containedIn("get_key", [this.paswd]);
                 query.find().then(res => {
+                    if (res.length <= 0) {
+                        vant.Notify({ type: 'warning', message: '获取信息失败', duration: 1000 });
+                    }
                     this.card_info.f_name = decodeURI(res[0].first_name)
                     this.card_info.l_name = decodeURI(res[0].last_name)
                     this.card_info.phone = res[0].phone
@@ -130,11 +133,13 @@
                 cleckInfo: function (title) {
                     var clipboard = new ClipboardJS('.content-item');
                     clipboard.on('success', function () {
-                        vant.Notify({ type: 'success', message: '复制 ' + title + ' 成功', duration: 1000 });
+                        vant.Toast.success('复制 ' + title + ' 成功');
+                        // vant.Notify({ type: 'success', message: '复制 ' + title + ' 成功', duration: 1000 });
                         clipboard.destroy()
                     })
                     clipboard.on('error', function () {
-                        vant.Notify({ type: 'warning', message: '该浏览器不支持自动复制', duration: 1000 });
+                        vant.Toast.fail('该浏览器不支持自动复制');
+                        // vant.Notify({ type: 'warning', message: '该浏览器不支持自动复制', duration: 1000 });
                         clipboard.destroy()
                     })
                 }

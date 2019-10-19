@@ -3,25 +3,85 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-    <title>刘洋</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.2/lib/index.css">
+    <title>{{card_info.f_name}}{{card_info.l_name}}</title>
+    <style>
+        html,
+        body,
+        #app {
+            height: 100%;
+        }
+
+        .load {
+            margin-top: 200px;
+        }
+
+        .head h1 {
+            padding-top: 20px;
+            padding-left: 20px;
+        }
+
+        .content {
+            text-align: left;
+            margin-left: 5%;
+            margin-right: 5%;
+            font-size: 20px;
+            height: 50px;
+            width: 90%;
+        }
+
+        .card-info {
+            height: 100%;
+        }
+    </style>
 </head>
 
 <body>
     <div id="app">
+        <van-overlay v-if="loading">
+            <van-loading class="load" size="200px" vertical type="spinner" color="#1989fa">加载中...</van-loading>
+        </van-overlay>
+        <van-panel v-else class="card-info">
+            <div slot="header" class="head">
+                <h1>{{card_info.f_name}}{{card_info.l_name}}</h1>
+            </div>
+            <van-divider></van-divider>
+            <div class="content">
+                <p class="content-item" :data-clipboard-text="card_info.phone" @click="cleckInfo('手机号')">
+                    <span>
+                        <van-icon name="static/img/end_of_the_call.png" />
+                    </span>
+                    <span> {{card_info.phone}}</span>
+                </p>
+                <p class="content-item" :data-clipboard-text="card_info.email" @click="cleckInfo('邮箱')">
+                    <span>
+                        <van-icon name="static/img/email.png" />
+                    </span>
+                    <span>{{card_info.email}}</span>
+                </p>
+                <p class="content-item" v-for="(item,index) in card_info.ext_info" :key="index"
+                    :data-clipboard-text="item.value" @click="cleckInfo(item.title)">
+                    <span>
+                        <van-icon :name="item.icon" />
+                    </span>
+                    <span>{{item.value}}</span>
+                </p>
 
-        <h1>{{card_info.f_name}}{{card_info.l_name}}</h1>
-        <p><b>TEL: </b>{{card_info.phone}}</p>
-        <p><b>Email: </b>{{card_info.email}}</p>
-        <p>
-            {{message}}
-        </p>
+            </div>
+        </van-panel>
     </div>
-    <!-- <script src="https://unpkg.com/element-ui/lib/index.js"></script> -->
+
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <!-- 引入组件库 -->
+    <script src="https://cdn.jsdelivr.net/npm/vant@2.2/lib/vant.min.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="Bmob-2.2.1.min.js"></script>
+    <script src="static/js/clipboard/clipboard.js"></script>
+    <script src="static/js/Bmob-2.2.1.min.js"></script>
     <script type="module">
-        import Vue from 'https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.esm.browser.js'
+        // import Vue from 'https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.esm.browser.js'
+        // import { Indicator } from 'https://unpkg.com/mint-ui/lib/index.js';
         // 初始化
         Bmob.initialize("1348df36d3789809", "78520A");
         var app = new Vue({
@@ -30,6 +90,7 @@
                 message: 'Hello Vue!',
                 uname: '',
                 paswd: '',
+                loading: true,
                 card_info: {
                     f_name: '',
                     l_name: '',
@@ -48,25 +109,34 @@
                         name: this.uname
                     }
                 }
-                Bmob.functions(params.funcName, params.data).then((response) => {
-                    console.log(response)
-                    this.message = response
-                    return
-                    this.card_info.f_name = decodeURI(response.results[0].first_name)
-                    this.card_info.l_name = decodeURI(response.results[0].last_name)
-                    this.card_info.phone = response.results[0].phone
-                    this.card_info.email = response.results[0].email
-                    var ext = decodeURI(response.results[0].ext_info)
-                    console.log(ext);
-
-                }).catch((error) => {
-                    console.log(error);
-                    this.message = error
+                const query = Bmob.Query("t_user_card_info");
+                query.containedIn("nk_name", [this.uname]);
+                query.containedIn("get_key", [this.paswd]);
+                query.find().then(res => {
+                    this.card_info.f_name = decodeURI(res[0].first_name)
+                    this.card_info.l_name = decodeURI(res[0].last_name)
+                    this.card_info.phone = res[0].phone
+                    this.card_info.email = res[0].email
+                    var ext_info = JSON.parse(decodeURI(res[0].ext_info))
+                    this.card_info.ext_info = ext_info
+                    this.loading = false
                 });
+
             },
             methods: {
                 getUrlKey: function (name) {
                     return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || [, ""])[1].replace(/\+/g, '%20')) || null
+                },
+                cleckInfo: function (title) {
+                    var clipboard = new ClipboardJS('.content-item');
+                    clipboard.on('success', function () {
+                        vant.Notify({ type: 'success', message: '复制 ' + title + ' 成功', duration: 1000 });
+                        clipboard.destroy()
+                    })
+                    clipboard.on('error', function () {
+                        vant.Notify({ type: 'warning', message: '该浏览器不支持自动复制', duration: 1000 });
+                        clipboard.destroy()
+                    })
                 }
             }
         })

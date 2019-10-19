@@ -80,8 +80,6 @@
     <script src="static/js/clipboard/clipboard.js"></script>
     <script src="static/js/Bmob-2.2.1.min.js"></script>
     <script type="module">
-        // import Vue from 'https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.esm.browser.js'
-        // import { Indicator } from 'https://unpkg.com/mint-ui/lib/index.js';
         // 初始化
         Bmob.initialize("1348df36d3789809", "78520A");
         var app = new Vue({
@@ -115,6 +113,11 @@
                 query.find().then(res => {
                     if (res.length <= 0) {
                         vant.Notify({ type: 'warning', message: '获取信息失败', duration: 1000 });
+                        this.card_info.f_name = '--'
+                        this.card_info.l_name = '--'
+                        this.card_info.phone = '--'
+                        this.card_info.email = '--'
+                        reutrn;
                     }
                     this.card_info.f_name = decodeURI(res[0].first_name)
                     this.card_info.l_name = decodeURI(res[0].last_name)

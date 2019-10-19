@@ -10,20 +10,9 @@
 <body>
     <div id="app">
 
-        <h1>刘洋</h1>
-        <h2>服务器研发工程师</h2>
-        <h3>天鸽互动控股有限公司(香港主板上市公司代码: 1980)</h3>
-        <b>TEL: </b><a href="tel:13811107587">138-1110-7587</a>
-        <b>Email: </b><a href="mailto:lojze@foxmail.com">lojze@foxmail.com</a>
-        <b>Gamil: </b><a href="mailto:lojzeliu@gmail.com">lojzeliu@gmail.com</a>
-        <b>WeChat: </b><a>813836993</a>
-        <p> uname:
-            {{ uname }}
-        </p>
-        <p> paswd:
-            {{ paswd }}
-        </p>
-
+        <h1>{{card_info.f_name}}{{card_info.l_name}}</h1>
+        <p><b>TEL: </b>{{card_info.phone}}</p>
+        <p><b>Email: </b>{{card_info.email}}</p>
         <p>
             {{message}}
         </p>
@@ -40,19 +29,40 @@
             data: {
                 message: 'Hello Vue!',
                 uname: '',
-                paswd: ''
+                paswd: '',
+                card_info: {
+                    f_name: '',
+                    l_name: '',
+                    nk_name: '',
+                    phone: '',
+                    email: '',
+                    ext_info: {}
+                }
             },
             created: function () {
                 this.uname = this.getUrlKey("name");
                 this.paswd = this.getUrlKey("paswd");
-                const query = Bmob.Query('t_user_card_info');
-                query.get('X5jI333N').then(res => {
-                    console.log(res)
-                    this.message = res
-                }).catch(err => {
-                    console.log(err)
-                    this.message = err
-                })
+                let params = {
+                    funcName: 'getcardinfo',
+                    data: {
+                        name: this.uname
+                    }
+                }
+                Bmob.functions(params.funcName, params.data).then((response) => {
+                    console.log(response)
+                    this.message = response
+                    return
+                    this.card_info.f_name = decodeURI(response.results[0].first_name)
+                    this.card_info.l_name = decodeURI(response.results[0].last_name)
+                    this.card_info.phone = response.results[0].phone
+                    this.card_info.email = response.results[0].email
+                    var ext = decodeURI(response.results[0].ext_info)
+                    console.log(ext);
+
+                }).catch((error) => {
+                    console.log(error);
+                    this.message = error
+                });
             },
             methods: {
                 getUrlKey: function (name) {
